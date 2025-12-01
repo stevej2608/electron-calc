@@ -1,13 +1,248 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8" />
-    <title>Hello World!</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+    <title>Calculator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .calculator {
+        background: #2d3748;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        width: 320px;
+      }
+
+      .display {
+        background: #1a202c;
+        color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: right;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .display-previous {
+        font-size: 14px;
+        color: #a0aec0;
+        margin-bottom: 5px;
+        min-height: 20px;
+      }
+
+      .display-current {
+        font-size: 32px;
+        font-weight: 300;
+        word-wrap: break-word;
+        word-break: break-all;
+      }
+
+      .buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+
+      button {
+        padding: 20px;
+        font-size: 18px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .btn-number, .btn-decimal {
+        background: #4a5568;
+        color: #fff;
+      }
+
+      .btn-number:hover, .btn-decimal:hover {
+        background: #5a6678;
+      }
+
+      .btn-operator {
+        background: #ed8936;
+        color: #fff;
+      }
+
+      .btn-operator:hover {
+        background: #f6a351;
+      }
+
+      .btn-clear {
+        background: #fc8181;
+        color: #fff;
+      }
+
+      .btn-clear:hover {
+        background: #feb2b2;
+      }
+
+      .btn-equals {
+        background: #48bb78;
+        color: #fff;
+        grid-column: span 2;
+      }
+
+      .btn-equals:hover {
+        background: #68d391;
+      }
+
+      .btn-zero {
+        grid-column: span 2;
+      }
+    </style>
   </head>
   <body>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
-    <script type="module" src="/src/renderer.ts"></script>
+    <div class="calculator">
+      <div class="display">
+        <div class="display-previous" id="previous-operand"></div>
+        <div class="display-current" id="current-operand">0</div>
+      </div>
+      <div class="buttons">
+        <button class="btn-clear" onclick="calculator.clear()">C</button>
+        <button class="btn-operator" onclick="calculator.delete()">DEL</button>
+        <button class="btn-operator" onclick="calculator.chooseOperation('÷')">÷</button>
+        <button class="btn-number" onclick="calculator.appendNumber('7')">7</button>
+        <button class="btn-number" onclick="calculator.appendNumber('8')">8</button>
+        <button class="btn-number" onclick="calculator.appendNumber('9')">9</button>
+        <button class="btn-operator" onclick="calculator.chooseOperation('×')">×</button>
+        <button class="btn-number" onclick="calculator.appendNumber('4')">4</button>
+        <button class="btn-number" onclick="calculator.appendNumber('5')">5</button>
+        <button class="btn-number" onclick="calculator.appendNumber('6')">6</button>
+        <button class="btn-operator" onclick="calculator.chooseOperation('-')">-</button>
+        <button class="btn-number" onclick="calculator.appendNumber('1')">1</button>
+        <button class="btn-number" onclick="calculator.appendNumber('2')">2</button>
+        <button class="btn-number" onclick="calculator.appendNumber('3')">3</button>
+        <button class="btn-operator" onclick="calculator.chooseOperation('+')">+</button>
+        <button class="btn-number btn-zero" onclick="calculator.appendNumber('0')">0</button>
+        <button class="btn-decimal" onclick="calculator.appendNumber('.')">.</button>
+        <button class="btn-equals" onclick="calculator.compute()">=</button>
+      </div>
+    </div>
+
+    <script>
+      class Calculator {
+        constructor(previousOperandElement, currentOperandElement) {
+          this.previousOperandElement = previousOperandElement;
+          this.currentOperandElement = currentOperandElement;
+          this.clear();
+        }
+
+        clear() {
+          this.currentOperand = '0';
+          this.previousOperand = '';
+          this.operation = undefined;
+          this.updateDisplay();
+        }
+
+        delete() {
+          if (this.currentOperand === '0') return;
+          if (this.currentOperand.length === 1) {
+            this.currentOperand = '0';
+          } else {
+            this.currentOperand = this.currentOperand.slice(0, -1);
+          }
+          this.updateDisplay();
+        }
+
+        appendNumber(number) {
+          if (number === '.' && this.currentOperand.includes('.')) return;
+          if (this.currentOperand === '0' && number !== '.') {
+            this.currentOperand = number;
+          } else {
+            this.currentOperand += number;
+          }
+          this.updateDisplay();
+        }
+
+        chooseOperation(operation) {
+          if (this.currentOperand === '') return;
+          if (this.previousOperand !== '') {
+            this.compute();
+          }
+          this.operation = operation;
+          this.previousOperand = this.currentOperand + ' ' + operation;
+          this.currentOperand = '0';
+          this.updateDisplay();
+        }
+
+        async compute() {
+          const prev = parseFloat(this.previousOperand);
+          const current = parseFloat(this.currentOperand);
+          if (isNaN(prev) || isNaN(current)) return;
+          if (!this.operation) return;
+
+          // Send calculation request to main process (business logic)
+          // GUI waits for the business logic to perform the calculation
+          try {
+            const result = await window.api.calculate(prev, current, this.operation);
+
+            // Display the result received from business logic
+            this.currentOperand = result.toString();
+            this.operation = undefined;
+            this.previousOperand = '';
+            this.updateDisplay();
+          } catch (error) {
+            console.error('Calculation error:', error);
+            this.currentOperand = 'Error';
+            this.updateDisplay();
+          }
+        }
+
+        updateDisplay() {
+          this.currentOperandElement.textContent = this.currentOperand;
+          this.previousOperandElement.textContent = this.previousOperand;
+        }
+      }
+
+      const previousOperandElement = document.getElementById('previous-operand');
+      const currentOperandElement = document.getElementById('current-operand');
+      const calculator = new Calculator(previousOperandElement, currentOperandElement);
+
+      // Keyboard support
+      document.addEventListener('keydown', (e) => {
+        if (e.key >= '0' && e.key <= '9') calculator.appendNumber(e.key);
+        if (e.key === '.') calculator.appendNumber('.');
+        if (e.key === '+' || e.key === '-') calculator.chooseOperation(e.key);
+        if (e.key === '*') calculator.chooseOperation('×');
+        if (e.key === '/') {
+          e.preventDefault();
+          calculator.chooseOperation('÷');
+        }
+        if (e.key === 'Enter' || e.key === '=') calculator.compute();
+        if (e.key === 'Escape') calculator.clear();
+        if (e.key === 'Backspace') calculator.delete();
+      });
+    </script>
   </body>
 </html>
