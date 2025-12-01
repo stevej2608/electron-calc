@@ -1,17 +1,29 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, screen} from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
+
+// Disable sandbox and GPU for containerized environments
+app.commandLine.appendSwitch('no-sandbox');
+app.commandLine.appendSwitch('disable-gpu');
+// app.disableHardwareAcceleration();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
 
+
 const createWindow = () => {
   // Create the browser window.
+
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { x, y, width, height } = primaryDisplay.bounds;
+
   const mainWindow = new BrowserWindow({
-    width: 800,
+    width: 400,
     height: 600,
+    x: x + Math.floor((width - 400) / 2),
+    y: y + Math.floor((height - 600) / 2),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
