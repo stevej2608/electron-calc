@@ -34,6 +34,12 @@ jobs:
       - name: Build application
         run: npm run make
 
+      - name: List build outputs (Debug)
+        shell: bash
+        run: |
+          echo "=== Build output structure ==="
+          ls -R out/make/ || echo "No make directory found"
+
       - name: Upload Release Assets (Linux)
         if: matrix.os == 'ubuntu-latest'
         uses: softprops/action-gh-release@v2
@@ -58,5 +64,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            out/make/zip/darwin/x64/*.zip
+            out/make/zip/darwin/**/*.zip
           fail_on_unmatched_files: true
