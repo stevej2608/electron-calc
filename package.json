@@ -1,8 +1,8 @@
 {
-  "name": "my-new-app",
-  "productName": "my-new-app",
+  "name": "electron-calc",
+  "productName": "electron-calc",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "A minimal cross-platform calculator application",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "ELECTRON_DISABLE_SANDBOX=1 electron-forge start",

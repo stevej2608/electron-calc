@@ -1,6 +1,8 @@
 # Calculator Electron App
 
-A cross-platform calculator application built with Electron, TypeScript, and Vite.
+![](./doc/img/screenshot.png)
+
+A minimal cross-platform calculator application built with Electron, TypeScript, and Vite.
 
 ## Features
 
@@ -12,6 +14,10 @@ A cross-platform calculator application built with Electron, TypeScript, and Vit
 - 🐛 Full debugging support with source maps
 
 ## Development
+
+The initial project template was created with [electronforge](https://www.electronforge.io/templates/vite-+-typescript)
+
+    npx create-electron-app@latest electron-calc --template=vite-typescript
 
 ### Prerequisites
 
@@ -134,6 +140,6 @@ This architecture makes the code:
 
 MIT
 
-## Author
+## Credits
 
-Steve Jones (jonesst2608@gmail.com)
+Built with lots of help from Anthropic [Claude](https://claude.ai/new)
