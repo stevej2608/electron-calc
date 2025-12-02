@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run make
+
+      - name: Get version from tag
+        id: get_version
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Upload Release Assets (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            out/make/deb/x64/*.deb
+            out/make/rpm/x64/*.rpm
+            out/make/zip/linux/x64/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            out/make/squirrel.windows/x64/*.exe
+            out/make/wix/x64/*.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            out/make/zip/darwin/x64/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
